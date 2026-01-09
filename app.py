@@ -7,6 +7,7 @@ Enhanced with comprehensive error handling, graceful degradation, and user-frien
 """
 
 import difflib
+import os
 import re
 
 import streamlit as st
@@ -221,11 +222,25 @@ def main():
     error_handler = get_error_handler()
     graceful_degradation = GracefulDegradation(error_handler)
     
+    # Check if we're in fallback mode (no Java available)
+    fallback_mode = os.environ.get('FALLBACK_MODE', 'false').lower() == 'true'
+    use_local_java = os.environ.get('USE_LOCAL_JAVA', 'true').lower() == 'true'
+    
+    if fallback_mode:
+        st.warning("⚠️ Running in fallback mode - Java execution not available in this environment")
+        st.info("💡 This demo shows the UI and LLM integration. For full Java execution, deploy with Docker support.")
+    
     # Initialize Java Runner with error handling
     if 'java_runner' not in st.session_state:
         try:
-            st.session_state.java_runner = JavaRunner()
-            st.session_state.java_runner_available = True
+            if fallback_mode:
+                # Create a mock Java runner for demo purposes
+                st.session_state.java_runner = None
+                st.session_state.java_runner_available = False
+                st.info("ℹ️ Java execution disabled in fallback mode")
+            else:
+                st.session_state.java_runner = JavaRunner()
+                st.session_state.java_runner_available = True
         except Exception as e:
             error_context = error_handler.handle_error(
                 exception=e,

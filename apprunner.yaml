@@ -3,16 +3,7 @@ runtime: python3
 build:
   commands:
     build:
-      - echo "Installing system dependencies..."
-      - apt-get update
-      - apt-get install -y default-jdk curl
-      - echo "Installing Python dependencies..."
       - pip install -r requirements.txt
-      - echo "Setting up Java environment..."
-      - export JAVA_HOME=/usr/lib/jvm/default-java
-      - export PATH=$JAVA_HOME/bin:$PATH
-      - mkdir -p /tmp/java-workspace
-      - mkdir -p logs
 run:
   runtime-version: 3.8
   command: streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false
@@ -22,7 +13,7 @@ run:
   env:
     - name: PORT
       value: "8080"
-    - name: JAVA_HOME
-      value: "/usr/lib/jvm/default-java"
-    - name: PATH
-      value: "/usr/lib/jvm/default-java/bin:$PATH"
+    - name: USE_LOCAL_JAVA
+      value: "false"
+    - name: FALLBACK_MODE
+      value: "true"
