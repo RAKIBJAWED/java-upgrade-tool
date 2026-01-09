@@ -3,7 +3,7 @@ runtime: python3
 build:
   commands:
     build:
-      - pip install streamlit==1.28.0 requests>=2.31.0 python-dotenv>=1.0.0 blinker click tornado
+      - pip install -r requirements-minimal-final.txt
 run:
   runtime-version: 3.8
   command: streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false
