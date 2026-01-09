@@ -14,15 +14,32 @@ import streamlit as st
 
 from agent.llm_agent import JavaFixAgent
 from config.settings import load_configuration, validate_configuration
-from core.error_classifier import ErrorClassifier
 from core.error_handling import (
     ErrorCategory, ErrorSeverity, GracefulDegradation,
     get_error_handler
 )
-# Import core modules
-from core.java_runner import JavaRunner
-from core.models import ExecutionResult, SystemStatus, SystemResponse
-from core.validation_system import ValidationAndRetrySystem, RetryConfiguration
+
+# Conditional imports for fallback mode
+try:
+    from core.error_classifier import ErrorClassifier
+    # Import core modules
+    from core.java_runner import JavaRunner
+    from core.models import ExecutionResult, SystemStatus, SystemResponse
+    from core.validation_system import ValidationAndRetrySystem, RetryConfiguration
+    JAVA_FEATURES_AVAILABLE = True
+except ImportError as e:
+    # Fallback mode - some features not available
+    JAVA_FEATURES_AVAILABLE = False
+    print(f"Warning: Some features not available: {e}")
+    # Create dummy classes for fallback
+    class ExecutionResult:
+        pass
+    class SystemStatus:
+        SUCCESS = "success"
+        FAILED = "failed"
+        FIXED = "fixed"
+    class SystemResponse:
+        pass
 
 
 def apply_java_syntax_highlighting(code: str) -> str:
@@ -223,7 +240,7 @@ def main():
     graceful_degradation = GracefulDegradation(error_handler)
     
     # Check if we're in fallback mode (no Java available)
-    fallback_mode = os.environ.get('FALLBACK_MODE', 'false').lower() == 'true'
+    fallback_mode = os.environ.get('FALLBACK_MODE', 'false').lower() == 'true' or not JAVA_FEATURES_AVAILABLE
     use_local_java = os.environ.get('USE_LOCAL_JAVA', 'true').lower() == 'true'
     
     if fallback_mode:
@@ -233,7 +250,7 @@ def main():
     # Initialize Java Runner with error handling
     if 'java_runner' not in st.session_state:
         try:
-            if fallback_mode:
+            if fallback_mode or not JAVA_FEATURES_AVAILABLE:
                 # Create a mock Java runner for demo purposes
                 st.session_state.java_runner = None
                 st.session_state.java_runner_available = False
