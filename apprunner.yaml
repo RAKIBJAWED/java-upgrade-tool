@@ -3,10 +3,10 @@ runtime: python3
 build:
   commands:
     build:
-      - pip install -r requirements-minimal-final.txt
+      - pip install -r requirements-flask.txt
 run:
   runtime-version: 3.8
-  command: streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false
+  command: python flask_app.py
   network:
     port: 8080
     env: PORT
