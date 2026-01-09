@@ -1,0 +1,18 @@
+{
+  "java_versions": {
+    "8": "eclipse-temurin:8-jdk",
+    "11": "eclipse-temurin:11-jdk",
+    "17": "eclipse-temurin:17-jdk",
+    "21": "eclipse-temurin:21-jdk"
+  },
+  "execution_timeout": 30,
+  "docker_memory_limit": "512m",
+  "docker_cpu_limit": "1.0",
+  "supported_llm_models": {
+    "GPT-4": "openai",
+    "GPT-3.5-turbo": "openai",
+    "Claude-3-opus": "anthropic",
+    "Claude-3-sonnet": "anthropic",
+    "Claude-3-haiku": "anthropic"
+  }
+}
