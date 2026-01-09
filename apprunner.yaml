@@ -3,17 +3,13 @@ runtime: python3
 build:
   commands:
     build:
-      - pip install -r requirements-flask.txt
+      - pip install -r requirements-production.txt
 run:
   runtime-version: 3.8
-  command: python flask_app.py
+  command: python production_app.py
   network:
     port: 8080
     env: PORT
   env:
     - name: PORT
       value: "8080"
-    - name: USE_LOCAL_JAVA
-      value: "false"
-    - name: FALLBACK_MODE
-      value: "true"
