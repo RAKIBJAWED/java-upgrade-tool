@@ -1,11 +1,20 @@
 version: 1.0
-runtime: docker
+runtime: python3
 build:
   commands:
     build:
-      - echo "Building Java Version Migration Tool..."
-      - echo "Docker build will be handled by App Runner"
+      - echo "Installing system dependencies..."
+      - apt-get update
+      - apt-get install -y default-jdk curl
+      - echo "Installing Python dependencies..."
+      - pip install -r requirements.txt
+      - echo "Setting up Java environment..."
+      - export JAVA_HOME=/usr/lib/jvm/default-java
+      - export PATH=$JAVA_HOME/bin:$PATH
+      - mkdir -p /tmp/java-workspace
+      - mkdir -p logs
 run:
+  runtime-version: 3.8
   command: streamlit run app.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false
   network:
     port: 8080
@@ -13,15 +22,7 @@ run:
   env:
     - name: PORT
       value: "8080"
-    - name: PYTHONPATH
-      value: "/app"
-    - name: STREAMLIT_SERVER_PORT
-      value: "8080"
-    - name: STREAMLIT_SERVER_ADDRESS
-      value: "0.0.0.0"
-    - name: STREAMLIT_SERVER_HEADLESS
-      value: "true"
-    - name: STREAMLIT_SERVER_ENABLE_CORS
-      value: "false"
-    - name: STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION
-      value: "false"
+    - name: JAVA_HOME
+      value: "/usr/lib/jvm/default-java"
+    - name: PATH
+      value: "/usr/lib/jvm/default-java/bin:$PATH"
