@@ -6,24 +6,23 @@ automatically identify and fix Java version compatibility issues.
 Enhanced with comprehensive error handling, graceful degradation, and user-friendly error messages.
 """
 
-import streamlit as st
-import os
-import traceback
 import difflib
 import re
-from pathlib import Path
 
-# Import core modules
-from core.java_runner import JavaRunner
-from core.models import ExecutionResult, SystemStatus
-from core.error_classifier import ErrorClassifier
-from core.validation_system import ValidationAndRetrySystem, RetryConfiguration
+import streamlit as st
+
 from agent.llm_agent import JavaFixAgent
 from config.settings import load_configuration, validate_configuration
+from core.error_classifier import ErrorClassifier
 from core.error_handling import (
-    ErrorHandler, ErrorCategory, ErrorSeverity, GracefulDegradation, 
-    get_error_handler, handle_api_error, handle_docker_error
+    ErrorCategory, ErrorSeverity, GracefulDegradation,
+    get_error_handler
 )
+# Import core modules
+from core.java_runner import JavaRunner
+from core.models import ExecutionResult, SystemStatus, SystemResponse
+from core.validation_system import ValidationAndRetrySystem, RetryConfiguration
+
 
 def apply_java_syntax_highlighting(code: str) -> str:
     """

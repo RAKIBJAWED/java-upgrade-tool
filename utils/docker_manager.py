@@ -68,6 +68,19 @@ class DockerManager:
         
         # Initialize Docker client with error handling
         self._initialize_docker_client()
+        
+        # Initialize fallback local Java runner for cloud deployment
+        self._initialize_local_runner()
+    
+    def _initialize_local_runner(self):
+        """Initialize local Java runner as fallback."""
+        try:
+            from utils.local_java_runner import LocalJavaRunner
+            self.local_runner = LocalJavaRunner()
+            self.logger.info("Local Java runner initialized as fallback")
+        except Exception as e:
+            self.logger.warning(f"Local Java runner initialization failed: {e}")
+            self.local_runner = None
     
     def _initialize_docker_client(self) -> None:
         """Initialize Docker client with comprehensive error handling."""
@@ -143,7 +156,7 @@ class DockerManager:
     
     def run_java_code(self, code: str, java_version: int) -> ExecutionResult:
         """
-        Compile and execute Java code in a Docker container with comprehensive error handling.
+        Compile and execute Java code with Docker or fallback to local execution.
         
         Args:
             code: Java source code to execute
@@ -152,16 +165,25 @@ class DockerManager:
         Returns:
             ExecutionResult: Execution results including output, errors, and metadata
         """
-        if self.client is None or self.config is None:
-            return self._fallback_execution(code, java_version)
+        # Try Docker first if available
+        if self.client is not None and self.config is not None:
+            try:
+                return self.graceful_degradation.execute_with_fallback(
+                    "docker_execution",
+                    self._execute_java_code,
+                    code,
+                    java_version
+                )
+            except Exception as e:
+                self.logger.warning(f"Docker execution failed, trying local runner: {e}")
         
-        # Use graceful degradation for Docker execution
-        return self.graceful_degradation.execute_with_fallback(
-            "docker_execution",
-            self._execute_java_code,
-            code,
-            java_version
-        )
+        # Fallback to local Java runner
+        if hasattr(self, 'local_runner') and self.local_runner is not None:
+            self.logger.info("Using local Java runner (Docker not available)")
+            return self.local_runner.run_java_code(code, java_version)
+        
+        # No execution method available
+        return self._fallback_execution(code, java_version)
     
     def _execute_java_code(self, code: str, java_version: int) -> ExecutionResult:
         """
